@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualisasi Data Survei PAUD/TK Kelompok I Kelas III C</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f7ff;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #4e73df;
+            margin-bottom: 30px;
+        }
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .chart-title {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #4e73df;
+        }
+        .nav {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .nav-btn {
+            background: #4e73df;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .nav-btn:hover {
+            background: #2e59d9;
+        }
+        .nav-btn.active {
+            background: #224abe;
+        }
+        .chart-wrapper {
+            display: none;
+        }
+        .chart-wrapper.active {
+            display: block;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Visualisasi Hasil Survei PAUD/TK Kelompok I Kelas III C</h1>
+        
+        <div class="nav">
+            <button class="nav-btn active" onclick="showChart(0)">Keterampilan</button>
+            <button class="nav-btn" onclick="showChart(1)">Kesulitan</button>
+            <button class="nav-btn" onclick="showChart(2)">Waktu Belajar</button>
+            <button class="nav-btn" onclick="showChart(3)">Media Belajar</button>
+            <button class="nav-btn" onclick="showChart(4)">Kesulitan Belajar</button>
+            <button class="nav-btn" onclick="showChart(5)">Worksheet Digital</button>
+            <button class="nav-btn" onclick="showChart(6)">Aktivitas Disukai</button>
+            <button class="nav-btn" onclick="showChart(7)">Media Disukai</button>
+            <button class="nav-btn" onclick="showChart(8)">Tema Belajar</button>
+            <button class="nav-btn" onclick="showChart(9)">Preferensi Worksheet</button>
+        </div>
+        
+        <div class="chart-wrapper active">
+            <div class="chart-title">1. Keterampilan yang Paling Perlu Ditingkatkan</div>
+            <div class="chart-container">
+                <canvas id="skillChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="chart-wrapper">
+            <div class="chart-title">2. Bagian Paling Sulit Dilakukan Anak</div>
+            <div class="chart-container">
+                <canvas id="difficultyChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="chart-wrapper">
+            <div class="chart-title">3. Waktu Ideal Belajar di Rumah per Hari</div>
+            <div class="chart-container">
+                <canvas id="timeChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="chart-wrapper">
+            <div class="chart-title">4. Media Belajar yang Lebih Mudah</div>
+            <div class="chart-container">
+                <canvas id="mediaChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="chart-wrapper">
+            <div class="chart-title">5. Kesulitan Terbesar Saat Belajar di Rumah</div>
+            <div class="chart-container">
+                <canvas id="problemChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="chart-wrapper">
+            <div class="chart-title">6. Kesediaan Menggunakan Worksheet Digital</div>
+            <div class="chart-container">
+                <canvas id="worksheetChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="chart-wrapper">
+            <div class="chart-title">7. Aktivitas yang Paling Disukai Anak</div>
+            <div class="chart-container">
+                <canvas id="activityChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="chart-wrapper">
+            <div class="chart-title">8. Media yang Lebih Disukai Anak</div>
+            <div class="chart-container">
+                <canvas id="preferredMediaChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="chart-wrapper">
+            <div class="chart-title">9. Tema Belajar yang Paling Menarik</div>
+            <div class="chart-container">
+                <canvas id="themeChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="chart-wrapper">
+            <div class="chart-title">10. Preferensi Worksheet</div>
+            <div class="chart-container">
+                <canvas id="worksheetPreferenceChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data untuk chart
+        const chartData = {
+            skills: {
+                labels: ['Konsentrasi & Fokus', 'Motorik Halus', 'Pra-menulis', 'Pra-membaca'],
+                datasets: [
+                    {
+                        label: 'Wali Murid',
+                        data: [8, 3, 3, 5],
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)'
+                    },
+                    {
+                        label: 'Guru',
+                        data: [6, 6, 6, 3],
+                        backgroundColor: 'rgba(255, 99, 132, 0.7)'
+                    }
+                ]
+            },
+            difficulties: {
+                labels: ['Menyelesaikan Tugas', 'Mengingat Huruf', 'Menebalkan Garis'],
+                datasets: [
+                    {
+                        label: 'Wali Murid',
+                        data: [9, 5, 2],
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)'
+                    },
+                    {
+                        label: 'Guru',
+                        data: [8, 9, 3],
+                        backgroundColor: 'rgba(255, 99, 132, 0.7)'
+                    }
+                ]
+            },
+            time: {
+                labels: ['10-15 menit', '20-30 menit', '30-60 menit'],
+                datasets: [
+                    {
+                        label: 'Wali Murid',
+                        data: [3, 8, 6],
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)'
+                    },
+                    {
+                        label: 'Guru',
+                        data: [5, 6, 8],
+                        backgroundColor: 'rgba(255, 99, 132, 0.7)'
+                    }
+                ]
+            },
+            media: {
+                labels: ['Gambar Berwarna', 'Hitam Putih'],
+                datasets: [
+                    {
+                        label: 'Wali Murid',
+                        data: [11, 7],
+                        backgroundColor: ['rgba(54, 162, 235, 0.7)', 'rgba(75, 192, 192, 0.7)']
+                    },
+                    {
+                        label: 'Guru',
+                        data: [13, 7],
+                        backgroundColor: ['rgba(255, 99, 132, 0.7)', 'rgba(255, 159, 64, 0.7)']
+                    }
+                ]
+            },
+            problems: {
+                labels: ['Sulit Fokus', 'Perlu Pendampingan'],
+                datasets: [
+                    {
+                        label: 'Wali Murid',
+                        data: [10, 7],
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)'
+                    },
+                    {
+                        label: 'Guru',
+                        data: [15, 4],
+                        backgroundColor: 'rgba(255, 99, 132, 0.7)'
+                    }
+                ]
+            },
+            worksheet: {
+                labels: ['Sangat Bersedia', 'Bersedia Jika Terjangkau'],
+                datasets: [
+                    {
+                        label: 'Wali Murid',
+                        data: [10, 7],
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)'
+                    },
+                    {
+                        label: 'Guru',
+                        data: [10, 9],
+                        backgroundColor: 'rgba(255, 99, 132, 0.7)'
+                    }
+                ]
+            },
+            activities: {
+                labels: ['Mewarnai', 'Menjodohkan', 'Gunting-Tempel', 'Tracing', 'Puzzle/Maze'],
+                datasets: [
+                    {
+                        label: 'Wali Murid',
+                        data: [10, 4, 1, 1, 1],
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)'
+                    },
+                    {
+                        label: 'Guru',
+                        data: [12, 1, 2, 4, 0],
+                        backgroundColor: 'rgba(255, 99, 132, 0.7)'
+                    }
+                ]
+            },
+            preferredMedia: {
+                labels: ['Permainan Manipulatif', 'Worksheet Cetak', 'Video Singkat', 'Flashcard'],
+                datasets: [
+                    {
+                        label: 'Wali Murid',
+                        data: [8, 4, 2, 2],
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)'
+                    },
+                    {
+                        label: 'Guru',
+                        data: [7, 6, 5, 1],
+                        backgroundColor: 'rgba(255, 99, 132, 0.7)'
+                    }
+                ]
+            },
+            themes: {
+                labels: ['Hewan & Tumbuhan', 'Makanan', 'Profesi', 'Transportasi', 'Islami'],
+                datasets: [
+                    {
+                        label: 'Wali Murid',
+                        data: [8, 5, 3, 1, 1],
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)'
+                    },
+                    {
+                        label: 'Guru',
+                        data: [13, 5, 1, 2, 0],
+                        backgroundColor: 'rgba(255, 99, 132, 0.7)'
+                    }
+                ]
+            },
+            worksheetPreference: {
+                labels: ['Hitam Putih', 'Full Color'],
+                datasets: [
+                    {
+                        label: 'Wali Murid',
+                        data: [9, 8],
+                        backgroundColor: ['rgba(54, 162, 235, 0.7)', 'rgba(75, 192, 192, 0.7)']
+                    },
+                    {
+                        label: 'Guru',
+                        data: [12, 7],
+                        backgroundColor: ['rgba(255, 99, 132, 0.7)', 'rgba(255, 159, 64, 0.7)']
+                    }
+                ]
+            }
+        };
+
+        // Inisialisasi chart
+        const charts = {};
+        
+        function initCharts() {
+            const ctx1 = document.getElementById('skillChart').getContext('2d');
+            charts.skillChart = new Chart(ctx1, {
+                type: 'bar',
+                data: chartData.skills,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Jumlah Responden'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            const ctx2 = document.getElementById('difficultyChart').getContext('2d');
+            charts.difficultyChart = new Chart(ctx2, {
+                type: 'bar',
+                data: chartData.difficulties,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Jumlah Responden'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            const ctx3 = document.getElementById('timeChart').getContext('2d');
+            charts.timeChart = new Chart(ctx3, {
+                type: 'bar',
+                data: chartData.time,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Jumlah Responden'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            const ctx4 = document.getElementById('mediaChart').getContext('2d');
+            charts.mediaChart = new Chart(ctx4, {
+                type: 'bar',
+                data: chartData.media,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Jumlah Responden'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            const ctx5 = document.getElementById('problemChart').getContext('2d');
+            charts.problemChart = new Chart(ctx5, {
+                type: 'bar',
+                data: chartData.problems,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Jumlah Responden'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            const ctx6 = document.getElementById('worksheetChart').getContext('2d');
+            charts.worksheetChart = new Chart(ctx6, {
+                type: 'bar',
+                data: chartData.worksheet,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Jumlah Responden'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            const ctx7 = document.getElementById('activityChart').getContext('2d');
+            charts.activityChart = new Chart(ctx7, {
+                type: 'bar',
+                data: chartData.activities,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Jumlah Responden'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            const ctx8 = document.getElementById('preferredMediaChart').getContext('2d');
+            charts.preferredMediaChart = new Chart(ctx8, {
+                type: 'bar',
+                data: chartData.preferredMedia,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Jumlah Responden'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            const ctx9 = document.getElementById('themeChart').getContext('2d');
+            charts.themeChart = new Chart(ctx9, {
+                type: 'bar',
+                data: chartData.themes,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Jumlah Responden'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            const ctx10 = document.getElementById('worksheetPreferenceChart').getContext('2d');
+            charts.worksheetPreferenceChart = new Chart(ctx10, {
+                type: 'bar',
+                data: chartData.worksheetPreference,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Jumlah Responden'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Fungsi untuk menampilkan chart tertentu
+        function showChart(index) {
+            const wrappers = document.querySelectorAll('.chart-wrapper');
+            const buttons = document.querySelectorAll('.nav-btn');
+            
+            wrappers.forEach(wrapper => wrapper.classList.remove('active'));
+            buttons.forEach(button => button.classList.remove('active'));
+            
+            wrappers[index].classList.add('active');
+            buttons[index].classList.add('active');
+        }
+        
+        // Inisialisasi chart saat halaman dimuat
+        window.onload = function() {
+            initCharts();
+        };
+    </script>
+</body>
+</html>
